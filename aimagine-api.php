@@ -78,6 +78,8 @@ function aimg_plugin_menu_func() {
                );
 }
 
+
+
 //=====Print the markup for the page
 function aimg_plugin_options() {
    if ( !current_user_can( "manage_options" ) )  {
