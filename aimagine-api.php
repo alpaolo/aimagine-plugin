@@ -104,7 +104,7 @@ function aimg_plugin_options() {
 function custom_function() {
    $post = get_post();
    if( isset($_POST) ) {
-      if ( is_page('api') ) {
+      if ( is_page('apiok') ) {
          if(!empty($_FILES['fileToUpload'])) {
             global $uploaded_file_name;
             $uploaddir = wp_upload_dir()['path']."/";
@@ -118,25 +118,41 @@ function custom_function() {
             }
          }
          else { // passa questo Bha ??
-            //$res = alt_get_attached_media( 'image/jpeg', $post->ID ); 
+            $res = alt_get_attached_media( 'image/jpeg', $post->ID ); 
+            //print_r($res);
+            $args = array( 
+               'post_type' => 'attachment', 
+               'post_mime_type' => 'image/png',
+               'numberposts' => -1, 
+               'post_status' => 'inherit', 
+               'post_parent' => 339
+            ); 
+            $images = get_children($args );
             
-            $images = get_attached_media('image/png', $post->ID); // Non ritorna nulla
-            foreach($images as $image) {
-               print(1);
-               echo wp_get_attachment_image_src($image->ID,'full');
-            }
             
-            /*
-            if (has_post_thumbnail( $post->ID )){
-               $image = wp_get_attachment_image_src(get_post_thumbnail_id($post->ID), 'single-post-thumbnail' );
-               print($image);
-            }
+            $content = $post->post_content;
+           /*
+            $content = apply_filters( 'avia_builder_precompile', get_post_meta( 247, '_aviaLayoutBuilderCleanData', true ) );
+            $content = apply_filters( 'the_content', $content );
+            $content = apply_filters('avf_template_builder_content', $content);
             */
+            //$content = Avia_Builder()->compile_post_content( $post );
+            
+            $output = preg_match_all('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $content, $matches); // cattura tutto il tag img
+            $output = preg_match_all('/src=[\'"]([^\'"]+)*/i', $content, $matches);
+            //print_r($matches[0]);
+            //$matches = ["pippo", "pluto"];
+            $c = count($matches[1]);
+            for ($i=0; $i<$c; $i++){
+               print_r ($matches[1][$i]);
+               echo "<br>";
+            }   
+            
          }    
       }
    }
    else {
-      alt_get_attached_media( 'image', $post->ID );
+      //alt_get_attached_media( 'image', $post->ID );
    }
 }
 add_action( 'template_redirect', 'custom_function' );
