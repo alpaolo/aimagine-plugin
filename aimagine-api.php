@@ -110,49 +110,40 @@ function custom_function() {
             $uploaddir = wp_upload_dir()['path']."/";
             $uploaded_file_name = basename($_FILES['fileToUpload']['name']);
             $uploadfile = $uploaddir . $uploaded_file_name;
-         
+
             if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], $uploadfile)) {
                //echo "File is valid, and was successfully uploaded.\n";
             } else {
                //echo "Possible file upload attack!\n";
             }
          }
+
          else { // passa questo Bha ??
-            $res = alt_get_attached_media( 'image/jpeg', $post->ID ); 
-            //print_r($res);
-            $args = array( 
-               'post_type' => 'attachment', 
-               'post_mime_type' => 'image/png',
-               'numberposts' => -1, 
-               'post_status' => 'inherit', 
-               'post_parent' => 339
-            ); 
-            $images = get_children($args );
-            
-            
             $content = $post->post_content;
-           /*
-            $content = apply_filters( 'avia_builder_precompile', get_post_meta( 247, '_aviaLayoutBuilderCleanData', true ) );
-            $content = apply_filters( 'the_content', $content );
-            $content = apply_filters('avf_template_builder_content', $content);
-            */
-            //$content = Avia_Builder()->compile_post_content( $post );
-            
             $output = preg_match_all('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $content, $matches); // cattura tutto il tag img
             $output = preg_match_all('/src=[\'"]([^\'"]+)*/i', $content, $matches);
-            //print_r($matches[0]);
-            //$matches = ["pippo", "pluto"];
+            $output = preg_match_all('/class=[\'"]([^\'"]+)*/i', $content, $matches);
             $c = count($matches[1]);
             for ($i=0; $i<$c; $i++){
+               /*
+               echo $i." ";
                print_r ($matches[1][$i]);
                echo "<br>";
-            }   
-            
+               */
+            }
+            //detect_face($matches[1][0]);
+            $images = get_images_highcompress_data();
+            foreach($images as $image) {
+               print_r($image);
+               echo "<br>";
+            }
+                   
          }    
       }
    }
    else {
       //alt_get_attached_media( 'image', $post->ID );
+     
    }
 }
 add_action( 'template_redirect', 'custom_function' );
@@ -176,7 +167,7 @@ add_shortcode('process', 'process_image');
 
 
 /***************************************************************************************************************************************************************
- * BLURFACE Shortcode function
+ * BLURFACE Shortcode function ( call remote API )
  * 
  */
 function detect_face_func( $atts, $aimagine ) {
@@ -199,6 +190,27 @@ function detect_face_func( $atts, $aimagine ) {
  }
 add_shortcode( "blurface", "detect_face_func" );
 
+/***************************************************************************************************************************************************************
+ * BLURFACE function ( call remote API )
+ * 
+ */
+function detect_face( $img_url) {
+   $handle = fopen($img_url, "r");
+   $image = fread($handle, filesize($path));
+   $base64_image = base64_encode($image);
+   print(filesize($path)."<br/>");
+   print(strlen($image)."<br/>");
+   print(strlen($base64_image)."<br/>");
+   $uploadRequest = array(
+      'file' => base64_encode($image)
+  );
+   $response = CallAPI('127.0.0.1:8000/api/v1/blur', $uploadRequest);
+   //$response = file_get_contents('http://127.0.0.1:8000/api/v1');
+   $response = json_decode($response, true);
+   $image_element = '<img src = "'.$path.'" /><br/>';
+   return $image_element."<p>".$response['message']."</p>"."<p>Bboxes: ".json_encode($response['bboxes'])."</p>";
+ }
+add_shortcode( "blurface", "detect_face_func" );
 
 /***************************************************************************************************************************************************************
  * Action: Enqueue custom script when body is open ( is possible to change the hook )
@@ -280,6 +292,44 @@ function alt_get_attached_media( $type, $post_id = 0 ) {
     * @param WP_Post   $post     Post object.
     */
    return (array) apply_filters( 'get_attached_media', $children, $type, $post );
+}
+
+/***************************************************************************************************************************************************************
+ * .......
+ * 
+ */
+function get_images_highcompress_data() {
+   $args = array(
+       'post_type' => 'attachment',
+       'post_mime_type' => 'image/jpeg,image/jpg,image/png',
+       'post_status' => 'inherit',
+       'posts_per_page' => -1,
+       'orderby' => 'id',
+       'order' => 'ASC'
+   );
+   // Get all the available thumbnail sizes
+   $sizes = get_intermediate_image_sizes();
+   // Query the attachments
+   $query_images = new WP_Query( $args );
+   $images = array();
+   // Run a loop 
+   /*
+   if ( $query_images->have_posts() ){
+       while ($query_images->have_posts()){
+           $query_images->the_post();
+           // For each attachment size, store its URL in an array
+           foreach ( $sizes as $key => $size ) {
+               $thumbnails[$key] = wp_get_attachment_image_src( get_the_ID(), $size)[0];
+           }
+           $images = array_merge( $thumbnails , $images );
+       }
+       return $images;
+   }
+   */
+   foreach ( $sizes as $key => $size ) {
+      $thumbnails[$key] = wp_get_attachment_image_src( 339, $size)[0];
+   }
+   return $images = array_merge( $thumbnails , $images );
 }
 
 
