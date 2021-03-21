@@ -1,0 +1,42 @@
+     <script>
+    check = function() {
+    if (window.jQuery) {  
+        // jQuery is loaded 
+        element = jQuery('.row'); 
+        alert(element.attr('class'));
+    } else {
+        // jQuery is not loaded
+        alert("Doesn't Work");
+    }
+}
+    </script>
+
+    {% for product in products %}
+      <div class="card">
+        <div class="card-header">
+          <h3>{{ product.nome|capitalize }}</h3>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">{{ product.nome|capitalize }}</h5>
+          <p class="card-text">{{ product.note }}</p>
+          <p>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+          Button with data-target
+        </button>
+      </p>
+      <div class="collapse" id="collapseExample">
+        <div class="card card-body">
+          Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+        </div>
+      </div>
+        </div>
+      </div>
+      
+    {% endfor %}
+
+          
+
+
+
+
+
