@@ -135,7 +135,7 @@ $data_a = ["ingredients" =>
         "nome"=> "nocciole",
         "id_fornitore"=> "14",
         "id_prodotto"=> "4",
-        "scheda"=>"http=>//www.tondagentileprelibata.it/nocciuolo.htm",
+        "scheda"=>"http://www.tondagentileprelibata.it/nocciuolo.htm",
         "semilavorato"=> "False"
     ],
     [
@@ -207,25 +207,25 @@ $data_a = ["ingredients" =>
         [
             "id"=> "1",
             "nome"=> "Barilla",
-            "sito"=> "http=>\/\/www.barilla.it",
+            "sito"=> "http:\/\/www.barilla.it",
             "note"=>"null"
         ],
         [
             "id"=> "4",
             "nome"=> "Bistefani",
-            "sito"=> "http=>\/\/www.bistefani.it",
+            "sito"=> "http:\/\/www.bistefani.it",
             "note"=>"null"
         ],
         [
             "id"=> "5",
             "nome"=> "Colussi",
-            "sito"=> "http=>\/\/www.colussi.it",
+            "sito"=> "http:\/\/www.colussi.it",
             "note"=>"null"
         ],
         [
             "id"=> "6",
             "nome"=> "Pasticceria Cucchi",
-            "sito"=> "http=>\/\/www.cucchi.it",
+            "sito"=> "http:\/\/www.cucchi.it",
             "note"=>"null"
         ]
     ],
@@ -233,37 +233,37 @@ $data_a = ["ingredients" =>
         [
           "id"=> "1",
           "nome"=> "Agraria Tornabene Srl",
-          "sito"=> "http=>//www.tornabene.it",
+          "sito"=> "http://www.tornabene.it",
           "origine"=> "IT"
         ],
         [
           "id"=> "2",
           "nome"=> "Allevamento Galline Spa",
-          "sito"=> "http=>//www.algall.it",
+          "sito"=> "http://www.algall.it",
           "origine"=> "IT"
         ],
         [
           "id"=> "3",
           "nome"=> "Az. Agricola Ladispoli",
-          "sito"=> "http=>//www.ladispoli.it",
+          "sito"=> "http://www.ladispoli.it",
           "origine"=> "IT"
         ],
         [
           "id"=> "4",
           "nome"=> "Uova&Uova",
-          "sito"=> "http=>//www.biuova.it",
+          "sito"=> "http://www.biuova.it",
           "origine"=> "IT"
         ],
         [
           "id"=> "5",
           "nome"=> "Zuccherificio Pasticcio",
-          "sito"=> "http=>//www.pasticcio.it",
+          "sito"=> "http://www.pasticcio.it",
           "origine"=> "IT"
         ],
          [
           "id"=> "6",
           "nome"=> "Zuccherificio Pasticcio",
-          "sito"=> "http=>//www.pasticcio.it",
+          "sito"=> "http://www.pasticcio.it",
           "origine"=> "IT"
         ],
          [
@@ -311,7 +311,7 @@ $data_a = ["ingredients" =>
         [
           "id"=> "14",
           "nome"=> "tondagentileprelibata",
-          "sito"=> "http=>//www.tondagentileprelibata.it/",
+          "sito"=> "http://www.tondagentileprelibata.it/",
           "origine"=> "IT"
         ],
         [
@@ -343,25 +343,25 @@ $data_a = ["ingredients" =>
         [
             "id"=> "1",
             "nome"=> "biscottone",
-            "note"=> "Il sapore tipico della pastafrolla di una volta, la forma grande e rettangolare del biscotto artigianale e la doratura di una spolverata di zucchero di canna=> sono questi gli ingredienti segreti per un biscotto che ti fa ritrovare ogni mattina i gusti semplici della tradizione.",
+            "note"=> "Il sapore tipico della pastafrolla di una volta, la forma grande e rettangolare del biscotto artigianale e la doratura di una spolverata di zucchero di canna, sono questi gli ingredienti segreti per un biscotto che ti fa ritrovare ogni mattina i gusti semplici della tradizione.",
             "id_produttore"=> "1"
         ],
         [
             "id"=> "2",
             "nome"=> "goloso",
-            "note"=>"",
+            "note"=>"Il sapore tipico della pastafrolla di una volta, la forma grande e rettangolare del biscotto artigianale e la doratura di una spolverata di zucchero di canna, sono questi gli ingredienti segreti per un biscotto che ti fa ritrovare ogni mattina i gusti semplici della tradizione.",
             "id_produttore"=> "4"
         ],
         [
             "id"=> "3",
             "nome"=> "carezze",
-            "note"=>"",
+            "note"=>"Il sapore tipico della pastafrolla di una volta, la forma grande e rettangolare del biscotto artigianale e la doratura di una spolverata di zucchero di canna, sono questi gli ingredienti segreti per un biscotto che ti fa ritrovare ogni mattina i gusti semplici della tradizione.",
             "id_produttore"=> "5"
         ],
         [
             "id"=> "4",
             "nome"=> "cecca",
-            "note"=>"",
+            "note"=>"Il sapore tipico della pastafrolla di una volta, la forma grande e rettangolare del biscotto artigianale e la doratura di una spolverata di zucchero di canna, sono questi gli ingredienti segreti per un biscotto che ti fa ritrovare ogni mattina i gusti semplici della tradizione.",
             "id_produttore"=> "6"
         ]
     ]

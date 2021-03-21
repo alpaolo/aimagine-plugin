@@ -76,9 +76,12 @@ function clbr_plugin_options() {
 */
 function view_products_func(){
    global $data_a;
-   $data = $data_a['products'];
-   //var_dump($data);
-   Timber::render('twig/view_products.html.twig', ['products'=>$data]);
+   $products = $data_a['products'];
+   $ingredients = $data_a['ingredients'];
+   $producers = $data_a['producers'];
+   $suppliers = $data_a['suppliers'];
+   //var_dump($ingredients[0]);
+   Timber::render('twig/view_products.html.twig', [ 'products'=>$products,'ingredients'=>$ingredients,'producer'=>$producers, 'suppliers'=>$suppliers ]);
 }
 add_shortcode( "view_products", "view_products_func" );
 
@@ -89,7 +92,6 @@ add_shortcode( "view_products", "view_products_func" );
 function api_view_products_func(){
    //$response = CallAPI('https://acbun7s2gc.execute-api.eu-west-1.amazonaws.com/default/getProducts', "");
    $response = file_get_contents('http://localhost:8000/prodotti/biscottone'); 
-
    $response = json_decode($response, true);
    $data = array(
       'products' =>  $response['products'],
@@ -106,7 +108,6 @@ add_shortcode( "api_view_products", "api_view_products_func" );
 * 
 */
 function your_theme_enqueue_scripts() {
-
    // jquery
    wp_enqueue_script( 'bootstrap', plugin_dir_url( __FILE__ ) . 'js/jquery3.6.0.min.js' );
    // all styles
@@ -115,7 +116,6 @@ function your_theme_enqueue_scripts() {
    // all scripts
    wp_enqueue_script( 'bootstrap', plugin_dir_url( __FILE__ ) . 'js/bootstrap.min.js' );
    //wp_enqueue_script( 'theme-script', plugin_dir_path( __FILE__ ); . '/js/scripts.js', array('jquery'), '20120206', true );
-
 }
 add_action( 'wp_enqueue_scripts', 'your_theme_enqueue_scripts' );
 add_action( 'admin_enqueue_scripts', 'your_theme_enqueue_scripts' ); // utilizzarlo solo per la pagina del plugin
