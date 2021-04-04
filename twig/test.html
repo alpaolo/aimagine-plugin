@@ -1,0 +1,36 @@
+<p>
+    {% for product in products %}
+    <div class="card mb-12" style="max-width: 1024px;">
+        <div class="row g-0">
+          
+          <div class="col-md-4">
+            <img src="{% static 'media/biscottone.png' %}" alt="..." width="100%" height="auto">
+          </div>
+
+          <div class="col-md-8">
+            <div class="card-body">
+              <h5 class="card-title">{{ product.nome }} {{ product.id_produttore}}</h5>
+              <p class="card-text">{{ product.note }}</p>
+              <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+            </div>
+          </div>
+
+            <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+              Ingredienti
+            </a>
+          <div class="collapse" id="collapseExample">
+            <div class="card card-body">
+       
+              <table class="table" style="width: 70%">
+                  <tbody>
+                            
+                  </tbody>               
+              </table>
+    
+            </div>   
+          </div><!-- end collapse -->
+
+        </div> <!-- end row -->
+      </div> <!-- end card -->
+    {% endfor %}
+    </p>

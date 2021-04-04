@@ -1,0 +1,37 @@
+ingredients = [
+    {"id":"1",
+    "nome":"farina 00",
+    "id_fornitore":"1",
+    "id_prodotto":"1",
+    "semilavorato": False
+    },
+    {"id":"2","nome":"uova",
+    "id_fornitore":"2",
+    "id_prodotto":"1",
+    "semilavorato": False
+    },
+    {"id":"3",
+    "nome":"farina 00",
+    "id_fornitore":"3",
+    "id_prodotto":"2",
+    "semilavorato": False
+    },
+    {"id":"4",
+    "nome":"zucchero",
+    "id_fornitore":"3",
+    "id_prodotto":"1",
+    "semilavorato": False
+    },
+    {"id":"5",
+    "nome":"uova",
+    "id_fornitore":"4",
+    "id_prodotto":"2",
+    "semilavorato": False
+    },
+    {"id":"7",
+    "nome":"farina 000",
+    "id_fornitore":"5",
+    "id_prodotto":"3"
+    ,"semilavorato": False
+    }
+]
