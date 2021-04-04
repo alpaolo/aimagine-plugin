@@ -16,43 +16,8 @@ require_once('aimagine.php');
 
 global $uploaded_file_name;
 
-
 /***************************************************************************************************************************************************************
- * CURL API call function ( ***** Is better to use wp functions )
- * 
- */
-function CallAPI($url,$data_to_send)
-{
-   $headers = array("Content-Type:multipart/form-data");
-   $ch = curl_init();
-   
-   curl_setopt_array($ch, array(
-      CURLOPT_URL => $url,
-      CURLOPT_HEADER => true,
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_HTTPHEADER => $headers,
-      CURLOPT_ENCODING => "",
-      CURLOPT_TIMEOUT => 30,
-      CURLOPT_POST => 1,
-      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-      CURLOPT_CUSTOMREQUEST => "POST",
-      CURLOPT_POSTFIELDS =>  $data_to_send,
-  ));
-  
-   //----Execute
-   $result=curl_exec($ch);
-
-   //----Closing
-   curl_close($ch);
-   //----Subtracts header size to get only body
-   $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-   $result = substr($result, $header_size);
-   return $result;
-}
-
-
-/***************************************************************************************************************************************************************
- * Plugin panel menu
+ * *** WP Plugin panel menu
  * 
  */ 
 function aimg_plugin_menu_func() {
@@ -67,9 +32,8 @@ function aimg_plugin_menu_func() {
 //Register the menu.
 add_action( "admin_menu", "aimg_plugin_menu_func" );
 
-
 /***************************************************************************************************************************************************************
- * Menu Callback - Print the markup for the page 
+ * *** WP Menu Callback - Print the markup for the page 
  * 
  */
 function aimg_plugin_options() {
@@ -86,8 +50,6 @@ function aimg_plugin_options() {
    );
 
    $query_images = new WP_Query( $query_images_args );
-
-   //
    $images = array();
    foreach ( $query_images->posts as $image ) {
       $images[] = wp_get_attachment_url( $image->ID );
@@ -96,10 +58,10 @@ function aimg_plugin_options() {
       Timber::render('twig/setup.html.twig', $data);
 }
 
-
 /***************************************************************************************************************************************************************
- * Action: Process file upload when post is ready
- * 
+ * *** WP ACTION: Process file upload when post is ready
+ *    Questa funzione è attivata dall'accesso alla pagina e trova le immagini contenute tramite le regex, trovando la sorgente è possibile caricare l'array di byte e mandarlo
+ *    alle funzioni di elaborazione.
  */ 
 function custom_function() {
    $post = get_post();
@@ -117,103 +79,72 @@ function custom_function() {
                //echo "Possible file upload attack!\n";
             }
          }
-
-         else { // passa questo Bha ??
+         else { 
             $content = $post->post_content;
             $output = preg_match_all('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $content, $matches); // cattura tutto il tag img
             $output = preg_match_all('/src=[\'"]([^\'"]+)*/i', $content, $matches);
-            $output = preg_match_all('/class=[\'"]([^\'"]+)*/i', $content, $matches);
-            $c = count($matches[1]);
-            for ($i=0; $i<$c; $i++){
+            //$output = preg_match_all('/class=[\'"]([^\'"]+)*/i', $content, $matches);
+            $c = count($matches[1]); // ##### Indice 1 per prelevare il nome
+            for ($i=0; $i<$c; $i++) { // ***** E' il caso di fare un loop ?
                /*
-               echo $i." ";
-               print_r ($matches[1][$i]);
-               echo "<br>";
+               * Get image absolute path 
                */
+               $img_path = $matches[1][$i];
+               $site_path = ABSPATH;
+               $filename = basename($img_path); // ***** Preleva solo il nome
+               $split_path = parse_url($img_path); // ***** Splitta l'url in segmenti
+               $abs_path = str_replace('\\','/', $site_path.substr($split_path['path'], strpos($split_path['path'], '/', 1)+1)); 
+               // ***** Inserire il processo per ogni immagine 
             }
-            //detect_face($matches[1][0]);
-            $images = get_images_highcompress_data();
-            foreach($images as $image) {
-               print_r($image);
-               echo "<br>";
-            }
-                   
+            /*
+            * Get image absolute path 
+            */
+            $img_path = $matches[1][0]; // ***** Get the first image
+            $site_path = ABSPATH;
+            $filename = basename($img_path); // ***** Preleva solo il nome
+            $split_path = parse_url($img_path); // ***** Splitta l'url in segmenti
+            $abs_path = str_replace('\\','/', $site_path.substr($split_path['path'], strpos($split_path['path'], '/', 1)+1));
+            //$results = detect_face_func($abs_path, NULL, Null);
+            
+            $res = CallAPI('127.0.0.1:8000/api/v1/blur', $abs_path /*, $image_data*/);
          }    
       }
    }
    else {
-      //alt_get_attached_media( 'image', $post->ID );
-     
+      // ***** Bha! Da capire
    }
 }
 add_action( 'template_redirect', 'custom_function' );
 
 
 /***************************************************************************************************************************************************************
- * Shortcode: Process image
- * 
- */ 
-function process_image($atts, $content = null) {
-   extract(shortcode_atts(array(
-      'type' => 'blur'
-   ), $atts));
-   wp_localize_script( 'imagine-my-js', 'my_js', 
-      array( 
-      'user_name' => 'pluto'
-      ) 
-   );
-}
-add_shortcode('process', 'process_image');
-
-
-/***************************************************************************************************************************************************************
- * BLURFACE Shortcode function ( call remote API )
+ * *** WP SHORTCODE: BLURFACE function ( call remote API )
  * 
  */
-function detect_face_func( $atts, $aimagine ) {
+function detect_face_func( $path, $atts, $aimagine ) {
+   
    $aimagine = ( $aimagine ) ? $aimagine : new Aimagine();
-   $path = $uploadfile; 
-   $handle = fopen($path, "r");
-   $image = fread($handle, filesize($path));
-   $base64_image = base64_encode($image);
-   print(filesize($path)."<br/>");
-   print(strlen($image)."<br/>");
-   print(strlen($base64_image)."<br/>");
+   //$path = $uploadfile; // *** Inserire upload
+   /*
+   $file_size = filesize ($path);
+   $handle = fopen($path, "rb");
+   $image_data = stream_get_contents($handle);
+   fclose($handle);
    $uploadRequest = array(
-      'file' => base64_encode($image)
-  );
-   $response = CallAPI('127.0.0.1:8000/api/v1/blur', $uploadRequest);
-   //$response = file_get_contents('http://127.0.0.1:8000/api/v1');
-   $response = json_decode($response, true);
-   $image_element = '<img src = "'.$path.'" /><br/>';
-   return $image_element."<p>".$response['message']."</p>"."<p>Bboxes: ".json_encode($response['bboxes'])."</p>";
- }
+      'file' => $image_data
+   );
+   */
+   $res = CallAPI('127.0.0.1:8000/api/v1/blur', $path /*, $image_data*/);
+      //$response = file_get_contents('http://127.0.0.1:8000/api/v1');
+      $res = json_decode($res, true);
+      $image_element = '<img src = "'.$path.'" /><br/>';
+      //return $response;
+   }
 add_shortcode( "blurface", "detect_face_func" );
 
-/***************************************************************************************************************************************************************
- * BLURFACE function ( call remote API )
- * 
- */
-function detect_face( $img_url) {
-   $handle = fopen($img_url, "r");
-   $image = fread($handle, filesize($path));
-   $base64_image = base64_encode($image);
-   print(filesize($path)."<br/>");
-   print(strlen($image)."<br/>");
-   print(strlen($base64_image)."<br/>");
-   $uploadRequest = array(
-      'file' => base64_encode($image)
-  );
-   $response = CallAPI('127.0.0.1:8000/api/v1/blur', $uploadRequest);
-   //$response = file_get_contents('http://127.0.0.1:8000/api/v1');
-   $response = json_decode($response, true);
-   $image_element = '<img src = "'.$path.'" /><br/>';
-   return $image_element."<p>".$response['message']."</p>"."<p>Bboxes: ".json_encode($response['bboxes'])."</p>";
- }
-add_shortcode( "blurface", "detect_face_func" );
 
 /***************************************************************************************************************************************************************
- * Action: Enqueue custom script when body is open ( is possible to change the hook )
+ * *** WP ACTION: Enqueue custom script when body is open ( is possible to change the hook )
  * 
  */ 
 function onloadscript() {
@@ -228,115 +159,62 @@ function onloadscript() {
       ) 
    );
 }
-add_action( 'wp_body_open', 'onloadscript' );
-
+//add_action( 'wp_body_open', 'onloadscript' );
 
 /***************************************************************************************************************************************************************
- * Enqueue bootstrap scripts and styles
+ * *** WP ENQUEUE: bootstrap scripts and styles
  * 
  */
 function your_theme_enqueue_scripts() {
+     // jquery
+   wp_deregister_script( 'jquery' );
+   wp_register_script( 'jquery', 'https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js');
+   wp_enqueue_script( 'jquery' );
    // all styles
-   wp_enqueue_style( 'bootstrap', plugin_dir_url( __FILE__ ) . 'css/bootstrap.min.css', '4.0', false);
-   //wp_enqueue_style( 'theme-style', plugin_dir_path( __FILE__ ); . '/css/style.css', array(), 20141119 );
+   wp_enqueue_style( 'bootstrapjs', plugin_dir_url( __FILE__ ) . 'css/bootstrap.min.css');
    // all scripts
-   wp_enqueue_script( 'bootstrap', plugin_dir_url( __FILE__ ) . 'js/bootstrap.min.js', '4.0', false );
-   //wp_enqueue_script( 'theme-script', plugin_dir_path( __FILE__ ); . '/js/scripts.js', array('jquery'), '20120206', true );
+   wp_enqueue_script( 'bootstrapcss', plugin_dir_url( __FILE__ ) . 'js/bootstrap.min.js' );
 }
 add_action( 'wp_enqueue_scripts', 'your_theme_enqueue_scripts' );
 add_action( 'admin_enqueue_scripts', 'your_theme_enqueue_scripts' ); // utilizzarlo solo per la pagina del plugin
 
 /***************************************************************************************************************************************************************
+ * *** WP DEQUEUE: jQuery (This function isn't called)
+ * 
+ */
+function my_scripts_method() { wp_deregister_script( 'jquery' );}
+//add_action('wp_enqueue_scripts', 'my_scripts_method');
+
+
+/***************************************************************************************************************************************************************
+ * 
  * SPARE FUNCTIONS
+ * 
  ***************************************************************************************************************************************************************/
 
-/***************************************************************************************************************************************************************
- * .......
- * 
- */
-function alt_get_attached_media( $type, $post_id = 0 ) {
-   $post = get_post( $post_id );
-   if ( ! $post ) {
-       return array();
-   }
-
-   $args = array(
-       'post_parent'    => $post->ID,
-       'post_type'      => 'attachment',
-       'post_mime_type' => $type,
-       'posts_per_page' => -1,
-       'orderby'        => 'menu_order',
-       'order'          => 'ASC',
-   );
-
-   /**
-    * Filters arguments used to retrieve media attached to the given post.
-    *
-    * @since 3.6.0
-    *
-    * @param array   $args Post query arguments.
-    * @param string  $type Mime type of the desired media.
-    * @param WP_Post $post Post object.
-    */
-   $args = apply_filters( 'get_attached_media_args', $args, $type, $post );
-
-   $children = get_children( $args );
-
-   /**
-    * Filters the list of media attached to the given post.
-    *
-    * @since 3.6.0
-    *
-    * @param WP_Post[] $children Array of media attached to the given post.
-    * @param string    $type     Mime type of the media desired.
-    * @param WP_Post   $post     Post object.
-    */
-   return (array) apply_filters( 'get_attached_media', $children, $type, $post );
-}
 
 /***************************************************************************************************************************************************************
- * .......
+ * CURL API call function ( ***** Is better to use wp functions )
  * 
  */
-function get_images_highcompress_data() {
-   $args = array(
-       'post_type' => 'attachment',
-       'post_mime_type' => 'image/jpeg,image/jpg,image/png',
-       'post_status' => 'inherit',
-       'posts_per_page' => -1,
-       'orderby' => 'id',
-       'order' => 'ASC'
-   );
-   // Get all the available thumbnail sizes
-   $sizes = get_intermediate_image_sizes();
-   // Query the attachments
-   $query_images = new WP_Query( $args );
-   $images = array();
-   // Run a loop 
-   /*
-   if ( $query_images->have_posts() ){
-       while ($query_images->have_posts()){
-           $query_images->the_post();
-           // For each attachment size, store its URL in an array
-           foreach ( $sizes as $key => $size ) {
-               $thumbnails[$key] = wp_get_attachment_image_src( get_the_ID(), $size)[0];
-           }
-           $images = array_merge( $thumbnails , $images );
-       }
-       return $images;
-   }
-   */
-   foreach ( $sizes as $key => $size ) {
-      $thumbnails[$key] = wp_get_attachment_image_src( 339, $size)[0];
-   }
-   return $images = array_merge( $thumbnails , $images );
+function CallAPI($url,$path /*,$data_to_send*/)
+{
+   $file = new \CURLFile($path); 
+   $data_to_send = ['file' => $file];
+   //$data_to_send = array('file' => $file);
+   $ch = curl_init();
+   curl_setopt_array($ch, array(
+      CURLOPT_URL => $url,
+      CURLOPT_POST => 1,
+      CURLOPT_POSTFIELDS =>  $data_to_send,
+      //CURLOPT_INFILE => $fp,
+  ));
+   //----Execute
+   $result=curl_exec($ch);
+   //----Closing
+   curl_close($ch);
+   //----Subtracts header size to get only body
+   $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+   $result = substr($result, $header_size);
+   //return $result;
 }
-
-
-
-
-
-
-
-
-
