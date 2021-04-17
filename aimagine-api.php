@@ -89,10 +89,10 @@ function custom_function() {
                /*
                * Get image absolute path 
                */
-               $img_path = $matches[1][$i];
+               $img_url = $matches[1][$i];
                $site_path = ABSPATH;
-               $filename = basename($img_path); // ***** Preleva solo il nome
-               $split_path = parse_url($img_path); // ***** Splitta l'url in segmenti
+               $filename = basename($img_url); // ***** Preleva solo il nome
+               $split_path = parse_url($img_url); // ***** Splitta l'url in segmenti
                $abs_path = str_replace('\\','/', $site_path.substr($split_path['path'], strpos($split_path['path'], '/', 1)+1)); 
                // ***** Inserire il processo per ogni immagine 
             }
@@ -103,10 +103,23 @@ function custom_function() {
             $site_path = ABSPATH;
             $filename = basename($img_path); // ***** Preleva solo il nome
             $split_path = parse_url($img_path); // ***** Splitta l'url in segmenti
-            $abs_path = str_replace('\\','/', $site_path.substr($split_path['path'], strpos($split_path['path'], '/', 1)+1));
+            $img_abs_path = str_replace('\\','/', $site_path.substr($split_path['path'], strpos($split_path['path'], '/', 1)+1));
             //$results = detect_face_func($abs_path, NULL, Null);
-            
-            $res = CallAPI('127.0.0.1:8000/api/v1/blur', $abs_path /*, $image_data*/);
+            // curl https://snkgdwftq8.execute-api.eu-west-1.amazonaws.com/default/detectFace -H 'content-type: application/json' --data '{"bar":"Hello World"}'
+            ob_start();
+            #$res = CallAPIX('127.0.0.1:8000/api/v1/awsblur', $img_abs_path);
+            #$res = CallAPI('https://haczwz6tc3.execute-api.eu-west-1.amazonaws.com/beta/detectFace', $img_abs_path);
+            $res = CallAPI('https://haczwz6tc3.execute-api.eu-west-1.amazonaws.com/beta/detectFace', $img_abs_path);
+            $x = ob_get_contents();
+            ob_end_clean();
+            echo $x;
+            /*$result = wp_remote_post('127.0.0.1:8000/api/v1/blur', array(
+               'method' => 'POST',
+               'headers' => $headers,
+               'httpversion' => '1.0',
+               'sslverify' => false,
+               'body' => json_encode($fields))
+           );*/
          }    
       }
    }
@@ -197,17 +210,26 @@ function my_scripts_method() { wp_deregister_script( 'jquery' );}
  * CURL API call function ( ***** Is better to use wp functions )
  * 
  */
-function CallAPI($url,$path /*,$data_to_send*/)
+function CallAPIX($url,$path)
 {
    $file = new \CURLFile($path); 
    $data_to_send = ['file' => $file];
+   #$data_to_send = json_encode(array('file' => $file), JSON_FORCE_OBJECT);
    //$data_to_send = array('file' => $file);
    $ch = curl_init();
    curl_setopt_array($ch, array(
       CURLOPT_URL => $url,
       CURLOPT_POST => 1,
       CURLOPT_POSTFIELDS =>  $data_to_send,
-      //CURLOPT_INFILE => $fp,
+      /*
+      CURLOPT_HTTPHEADER => array(
+         'Content-Type: application/json',
+         'AWS Region: eu-west-1',
+      ),
+      */
+      
+      
+         
   ));
    //----Execute
    $result=curl_exec($ch);
@@ -217,4 +239,32 @@ function CallAPI($url,$path /*,$data_to_send*/)
    $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
    $result = substr($result, $header_size);
    //return $result;
+}
+
+function CallAPI($url,$path)
+{
+   //curl --request POST -H "Accept: image/png" -H "Content-Type: image/png" --data-binary "@apigateway.png" https://XXXXX.execute-api.us-east-1.amazonaws.com/prod > apigateway-thumb.png
+   
+   $file = new \CURLFile($path); 
+   $file = file_get_contents($path);
+   $b64file = base64_encode($file);
+   //$post_fields = ['file' => $file];
+   //$post_fields = json_encode(array('file' => $file), JSON_FORCE_OBJECT);
+   //var_dump($post_fields);
+   $ch = curl_init();
+   
+   curl_setopt($ch, CURLOPT_URL,$url);
+   curl_setopt($ch, CURLOPT_POST, 1);
+   curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array('file' => $b64file), JSON_FORCE_OBJECT));
+    
+   curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                        'Content-Type: image/jpg',
+                        'Accept: image/png', 
+                        'AWS Region: eu-west-1',
+                     ));
+   
+     $result = curl_exec($ch);
+     curl_close($ch);
+     $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+     //$result = substr($result, $header_size);
 }
